@@ -3,7 +3,7 @@ CREATE TYPE "public"."payment_method" AS ENUM('cash', 'transfer');--> statement-
 CREATE TYPE "public"."role" AS ENUM('superadmin', 'customer', 'vendor');--> statement-breakpoint
 CREATE TABLE "goods" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"vendor_id" uuid NOT NULL,
+	"vendor_branch_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"category_id" uuid NOT NULL,
 	"name" varchar(100) NOT NULL,
@@ -52,7 +52,18 @@ CREATE TABLE "vendor" (
 	CONSTRAINT "vendor_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-ALTER TABLE "goods" ADD CONSTRAINT "goods_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE TABLE "vendor_branch" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"vendor_id" uuid NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"address" varchar(255) NOT NULL,
+	"phone" varchar(20) NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "vendor_branch_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
+ALTER TABLE "goods" ADD CONSTRAINT "goods_vendor_branch_id_vendor_branch_id_fk" FOREIGN KEY ("vendor_branch_id") REFERENCES "public"."vendor_branch"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "goods" ADD CONSTRAINT "goods_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "goods" ADD CONSTRAINT "goods_category_id_goods_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."goods_category"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vendor" ADD CONSTRAINT "vendor_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "vendor" ADD CONSTRAINT "vendor_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "vendor_branch" ADD CONSTRAINT "vendor_branch_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE no action ON UPDATE no action;

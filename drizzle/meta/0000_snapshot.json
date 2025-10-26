@@ -1,5 +1,5 @@
 {
-  "id": "cab1be77-d569-494c-b733-be3249f8324a",
+  "id": "a6967ddc-8391-4fd3-90d7-4fd7cb4d7da6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -15,8 +15,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "vendor_id": {
-          "name": "vendor_id",
+        "vendor_branch_id": {
+          "name": "vendor_branch_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -100,12 +100,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "goods_vendor_id_vendor_id_fk": {
-          "name": "goods_vendor_id_vendor_id_fk",
+        "goods_vendor_branch_id_vendor_branch_id_fk": {
+          "name": "goods_vendor_branch_id_vendor_branch_id_fk",
           "tableFrom": "goods",
-          "tableTo": "vendor",
+          "tableTo": "vendor_branch",
           "columnsFrom": [
-            "vendor_id"
+            "vendor_branch_id"
           ],
           "columnsTo": [
             "id"
@@ -359,6 +359,79 @@
           "nullsNotDistinct": false,
           "columns": [
             "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.vendor_branch": {
+      "name": "vendor_branch",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "vendor_id": {
+          "name": "vendor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "vendor_branch_vendor_id_vendor_id_fk": {
+          "name": "vendor_branch_vendor_id_vendor_id_fk",
+          "tableFrom": "vendor_branch",
+          "tableTo": "vendor",
+          "columnsFrom": [
+            "vendor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "vendor_branch_id_unique": {
+          "name": "vendor_branch_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
           ]
         }
       },

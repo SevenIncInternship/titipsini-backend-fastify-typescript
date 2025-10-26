@@ -30,6 +30,15 @@ export const vendor = pgTable("vendor", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+export const vendorBranch = pgTable("vendor_branch", {
+  id: uuid("id").primaryKey().defaultRandom().unique(),
+  vendorId: uuid("vendor_id").references(() => vendor.id).notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  address: varchar("address", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 export const goodsCategory = pgTable("goods_category", {
   id: uuid("id").primaryKey().defaultRandom().unique(),
   title: varchar("name", { length: 100 }).notNull(),
@@ -39,7 +48,7 @@ export const goodsCategory = pgTable("goods_category", {
 
 export const goods = pgTable("goods", {
   id: uuid("id").primaryKey().defaultRandom().unique(),
-  vendorId: uuid("vendor_id").references(() => vendor.id).notNull(),
+  vendorBranchId: uuid("vendor_branch_id").references(() => vendorBranch.id).notNull(),
   userId: uuid("user_id").references(() => users.id).notNull(),
   categoryId: uuid("category_id").references(() => goodsCategory.id).notNull(),
   name: varchar("name", { length: 100 }).notNull(),

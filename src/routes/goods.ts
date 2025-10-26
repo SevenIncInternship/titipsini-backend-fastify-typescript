@@ -34,7 +34,7 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
         return reply.code(400).send({ errors: parseResult.error.flatten() });
       }
 
-      const { vendorId, categoryId, name, quantity, dateIn, dateOut, paymentMethod, bank } =
+      const { vendorBranchId, categoryId, name, quantity, dateIn, dateOut, paymentMethod, bank } =
         parseResult.data;
       const userId = req.user.id;
 
@@ -74,7 +74,7 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
         .insert(goods)
         .values({
           // @ts-ignore
-          vendorId,
+          vendorBranchId,
           userId,
           categoryId,
           name,
@@ -100,16 +100,16 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
     "/",
     { preHandler: [fastify.authenticate] },
     async (req, reply) => {
-      const { status, vendorId, userId } = req.query as {
+      const { status, vendorBranchId, userId } = req.query as {
         status?: boolean;
-        vendorId?: string;
+        vendorBranchId?: string;
         userId?: string;
       };
 
       let conditions = [];
 
       if (status) conditions.push(eq(goods.status, status));
-      if (vendorId) conditions.push(eq(goods.vendorId, vendorId));
+      if (vendorBranchId) conditions.push(eq(goods.vendorBranchId, vendorBranchId));
       if (userId) conditions.push(eq(goods.userId, userId));
 
       const query =
@@ -130,7 +130,7 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
   );
   // ✅ DELETE Goods
   fastify.delete(
-    "/delete/:id",
+    "/:id/delete",
     { preHandler: [fastify.authenticate] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
