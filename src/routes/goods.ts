@@ -24,6 +24,30 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
     }
   );
 
+  fastify.get(
+    "/category",
+    { preHandler: [fastify.authenticate] },
+    async () => {
+      return await db.select().from(goodsCategory);
+    }
+  )
+
+  fastify.delete(
+    "/category/:id",
+    { preHandler: [fastify.authenticate] },
+    async (req, reply) => {
+      const { id } = req.params as any;
+      const result = await db
+        .delete(goodsCategory)
+        .where(eq(goodsCategory.id, id))
+        .returning();
+      reply.code(200).send({
+        message: "Category deleted successfully",
+        data: result[0],
+      });
+    }
+  );
+
   fastify.post(
     "/",
     { preHandler: [fastify.authenticate] },
@@ -34,13 +58,26 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
         return reply.code(400).send({ errors: parseResult.error.flatten() });
       }
 
-      const { vendorBranchId, categoryId, name, quantity, dateIn, dateOut, paymentMethod, bank } =
-        parseResult.data;
+      const {
+        vendorBranchId,
+        categoryId,
+        name,
+        quantity,
+        dateIn,
+        dateOut,
+        paymentMethod,
+        bank,
+      } = parseResult.data;
+
       const userId = req.user.id;
 
+      const startDate = new Date(dateIn);
+      const endDate = new Date(dateOut);
+
+      const formattedDateIn = startDate.toISOString().split("T")[0];
+      const formattedDateOut = endDate.toISOString().split("T")[0];
+
       // Perhitungan jumlah hari
-      const startDate = dateIn;
-      const endDate = dateOut;
       const dayTotal = Math.ceil(
         (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
       );
@@ -69,18 +106,30 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
       // Hitung total harga
       const totalPrice = price * dayTotal * quantity;
 
+      // ✅ Validasi tambahan: kalau cash, bank boleh kosong
+      if (paymentMethod === "cash" && bank) {
+        return reply.code(400).send({
+          message: "Bank should not be provided when payment method is cash",
+        });
+      }
+
+      if (paymentMethod === "transfer" && !bank) {
+        return reply.code(400).send({
+          message: "Bank must be provided when payment method is transfer",
+        });
+      }
+
       // Simpan data barang
       const result = await db
         .insert(goods)
         .values({
-          // @ts-ignore
           vendorBranchId,
           userId,
           categoryId,
           name,
           quantity,
-          dateIn: startDate,
-          dateOut: endDate,
+          dateIn: formattedDateIn, // ✅ gunakan format string
+          dateOut: formattedDateOut, // ✅ gunakan format string
           dayTotal,
           paymentMethod,
           bank,
@@ -109,7 +158,8 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
       let conditions = [];
 
       if (status) conditions.push(eq(goods.status, status));
-      if (vendorBranchId) conditions.push(eq(goods.vendorBranchId, vendorBranchId));
+      if (vendorBranchId)
+        conditions.push(eq(goods.vendorBranchId, vendorBranchId));
       if (userId) conditions.push(eq(goods.userId, userId));
 
       const query =

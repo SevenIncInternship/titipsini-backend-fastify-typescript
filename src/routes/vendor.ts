@@ -92,6 +92,19 @@ export default async function vendorRoutes(fastify: FastifyInstance) {
     }
   );
 
+  fastify.get(
+    "/:vendorId/branch",
+    { preHandler: [fastify.authenticate] },
+    async (req, reply) => {
+      const { vendorId } = req.params as { vendorId: string };
+      const result = await db
+        .select()
+        .from(vendorBranch)
+        .where(eq(vendorBranch.vendorId, vendorId));
+      return reply.send(result);
+    }
+  );
+
   // GET all vendors
   fastify.get(
     "/",
@@ -117,6 +130,29 @@ export default async function vendorRoutes(fastify: FastifyInstance) {
 
       if (result.length === 0) {
         return reply.code(404).send({ message: "Vendor not found" });
+      }
+
+      return reply.send(result[0]);
+    }
+  );
+
+  // GET vendor by userId
+  fastify.get(
+    "/by-user",
+    { preHandler: [fastify.authenticate] },
+    async (req, reply) => {
+      const userId = req.user.id; // ambil dari token/authenticated user
+
+      const result = await db
+        .select()
+        .from(vendor)
+        .where(eq(vendor.userId, userId))
+        .limit(1);
+
+      if (result.length === 0) {
+        return reply
+          .code(404)
+          .send({ message: "Vendor not found for this user" });
       }
 
       return reply.send(result[0]);

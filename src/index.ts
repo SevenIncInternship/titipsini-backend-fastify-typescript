@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
 import vendorRoutes from "./routes/vendor";
 import goodsRoutes from "./routes/goods";
+import statsRoutes from "./routes/stats";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ fastify.register(async (app) => {
   app.register(userRoutes, { prefix: "/users" });
   app.register(vendorRoutes, { prefix: "/vendor" });
   app.register(goodsRoutes, { prefix: "/goods" });
+  app.register(statsRoutes, { prefix: "/stats" });
 }, { prefix: "/api/v1" });
 
 const start = async () => {

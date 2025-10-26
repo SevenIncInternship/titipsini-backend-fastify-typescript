@@ -65,6 +65,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
       email: user.email,
       role: user.role,
     });
-    reply.send({ message: "Login successful", token });
+    reply.send({ message: "Login successful", token, user });
   });
 }
