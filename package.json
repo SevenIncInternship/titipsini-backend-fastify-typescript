@@ -17,7 +17,6 @@
     "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.7",
     "fastify": "^5.6.1",
-    "fastify-jwt": "^4.2.0",
     "fastify-plugin": "^5.1.0",
     "pg": "^8.16.3",
     "zod": "^4.1.12"

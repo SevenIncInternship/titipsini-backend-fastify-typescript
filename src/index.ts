@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import jwtPlugin from "./plugins/jwt";
 import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
+import vendorRoutes from "./routes/vendor";
+import goodsRoutes from "./routes/goods";
 
 dotenv.config();
 
@@ -15,6 +17,8 @@ fastify.register(jwtPlugin);
 fastify.register(async (app) => {
   app.register(authRoutes, { prefix: "/auth" });
   app.register(userRoutes, { prefix: "/users" });
+  app.register(vendorRoutes, { prefix: "/vendor" });
+  app.register(goodsRoutes, { prefix: "/goods" });
 }, { prefix: "/api/v1" });
 
 const start = async () => {
