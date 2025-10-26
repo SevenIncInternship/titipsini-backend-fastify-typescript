@@ -12,7 +12,7 @@ dotenv.config();
 const fastify = Fastify({ logger: true });
 
 //  Register CORS
-await fastify.register(cors, {
+fastify.register(cors, {
   origin: "*", // izinkan semua origin
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
