@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import dotenv from "dotenv";
+import cors from "@fastify/cors"; 
 import jwtPlugin from "./plugins/jwt";
 import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
@@ -10,10 +11,17 @@ dotenv.config();
 
 const fastify = Fastify({ logger: true });
 
-// Plugins
+//  Register CORS
+await fastify.register(cors, {
+  origin: "*", // izinkan semua origin
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+});
+
+//  Plugins
 fastify.register(jwtPlugin);
 
-
+//  Routes
 fastify.register(async (app) => {
   app.register(authRoutes, { prefix: "/auth" });
   app.register(userRoutes, { prefix: "/users" });
