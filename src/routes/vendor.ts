@@ -115,6 +115,15 @@ export default async function vendorRoutes(fastify: FastifyInstance) {
     }
   );
 
+  fastify.get(
+    '/branch',
+    { preHandler: [fastify.authenticate] },
+    async (req, reply) => {
+      const result = await db.select().from(vendorBranch);
+      return reply.send(result);
+    }
+  )
+
   // GET vendor by ID
   fastify.get(
     "/:id",
