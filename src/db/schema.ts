@@ -1,6 +1,13 @@
-import { pgTable, varchar, timestamp, pgEnum, uuid, date, integer, boolean, } from "drizzle-orm/pg-core";
-
-
+import {
+  pgTable,
+  varchar,
+  timestamp,
+  pgEnum,
+  uuid,
+  date,
+  integer,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["superadmin", "customer", "vendor"]);
 
@@ -19,38 +26,47 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-
 export const vendor = pgTable("vendor", {
   id: uuid("id").primaryKey().defaultRandom().unique(),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" }) // ✅ otomatis hapus vendor saat user dihapus
+    .notNull(),
   companyName: varchar("company_name", { length: 100 }).notNull(),
   companyAddress: varchar("company_address", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-})
+});
 
 export const vendorBranch = pgTable("vendor_branch", {
   id: uuid("id").primaryKey().defaultRandom().unique(),
-  vendorId: uuid("vendor_id").references(() => vendor.id).notNull(),
+  vendorId: uuid("vendor_id")
+    .references(() => vendor.id, { onDelete: "cascade" }) // ✅ hapus cabang saat vendor dihapus
+    .notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   address: varchar("address", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-})
+});
 
 export const goodsCategory = pgTable("goods_category", {
   id: uuid("id").primaryKey().defaultRandom().unique(),
   title: varchar("name", { length: 100 }).notNull(),
   price: integer("price").notNull(),
   description: varchar("description", { length: 255 }),
-})
+});
 
 export const goods = pgTable("goods", {
   id: uuid("id").primaryKey().defaultRandom().unique(),
-  vendorBranchId: uuid("vendor_branch_id").references(() => vendorBranch.id).notNull(),
-  userId: uuid("user_id").references(() => users.id).notNull(),
-  categoryId: uuid("category_id").references(() => goodsCategory.id).notNull(),
+  vendorBranchId: uuid("vendor_branch_id")
+    .references(() => vendorBranch.id, { onDelete: "cascade" }) // ✅ hapus barang jika cabang dihapus
+    .notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" }) // ✅ hapus barang jika user dihapus
+    .notNull(),
+  categoryId: uuid("category_id")
+    .references(() => goodsCategory.id, { onDelete: "cascade" }) // ✅ hapus barang jika kategori dihapus
+    .notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   quantity: integer("quantity").notNull(),
   dateIn: date("date_in").notNull(),
@@ -62,4 +78,3 @@ export const goods = pgTable("goods", {
   totalPrice: integer("total_price").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-

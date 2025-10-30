@@ -62,8 +62,8 @@ CREATE TABLE "vendor_branch" (
 	CONSTRAINT "vendor_branch_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
-ALTER TABLE "goods" ADD CONSTRAINT "goods_vendor_branch_id_vendor_branch_id_fk" FOREIGN KEY ("vendor_branch_id") REFERENCES "public"."vendor_branch"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "goods" ADD CONSTRAINT "goods_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "goods" ADD CONSTRAINT "goods_category_id_goods_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."goods_category"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vendor" ADD CONSTRAINT "vendor_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vendor_branch" ADD CONSTRAINT "vendor_branch_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "goods" ADD CONSTRAINT "goods_vendor_branch_id_vendor_branch_id_fk" FOREIGN KEY ("vendor_branch_id") REFERENCES "public"."vendor_branch"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "goods" ADD CONSTRAINT "goods_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "goods" ADD CONSTRAINT "goods_category_id_goods_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."goods_category"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "vendor" ADD CONSTRAINT "vendor_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "vendor_branch" ADD CONSTRAINT "vendor_branch_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE cascade ON UPDATE no action;

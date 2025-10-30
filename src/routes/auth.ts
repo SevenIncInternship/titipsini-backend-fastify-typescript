@@ -1,13 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { db } from "../db";
-import { users } from "../db/schema";
+import { users, vendor } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { hashPassword, comparePassword } from "../utils/hash";
-import {
-  registerSchema,
-  loginSchema,
-
-} from "../validation/auth";
+import { registerSchema, loginSchema } from "../validation/auth";
 
 export default async function authRoutes(fastify: FastifyInstance) {
   // --- REGISTER ---
@@ -17,8 +13,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ errors: parseResult.error.flatten() });
     }
 
-    const { name, email, address, phone, password, role } =
-      parseResult.data
+    const { name, email, address, phone, password, role } = parseResult.data;
 
     const existing = await db.query.users.findFirst({
       where: eq(users.email, email),
@@ -60,11 +55,30 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return reply.code(401).send({ message: "Invalid credentials" });
     }
 
+    // Jika user adalah vendor, ambil relasinya
+    let vendorData = null;
+    if (user.role === "vendor") {
+      vendorData = await db.query.vendor.findFirst({
+        where: eq(vendor.userId, user.id),
+      });
+    }
+
     const token = fastify.jwt.sign({
       id: user.id,
       email: user.email,
       role: user.role,
+      // @ts-ignore
+      vendorId: vendorData?.id || null,
     });
-    reply.send({ message: "Login successful", token, user });
+
+    reply.send({
+      message: "Login successful",
+      token,
+      user: {
+        ...user,
+        vendorId: vendorData?.id || null,
+        companyName: vendorData?.companyName || null,
+      },
+    });
   });
 }

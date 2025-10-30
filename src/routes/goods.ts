@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { db } from "../db";
 import { eq, and } from "drizzle-orm";
-import { goods, goodsCategory } from "../db/schema";
+import { goods, goodsCategory, vendorBranch } from "../db/schema";
 import { goodsSchema } from "../validation/goods";
 
 export default async function goodsRoutes(fastify: FastifyInstance) {
@@ -24,13 +24,9 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
     }
   );
 
-  fastify.get(
-    "/category",
-    { preHandler: [fastify.authenticate] },
-    async () => {
-      return await db.select().from(goodsCategory);
-    }
-  )
+  fastify.get("/category", { preHandler: [fastify.authenticate] }, async () => {
+    return await db.select().from(goodsCategory);
+  });
 
   fastify.delete(
     "/category/:id",
@@ -149,32 +145,48 @@ export default async function goodsRoutes(fastify: FastifyInstance) {
     "/",
     { preHandler: [fastify.authenticate] },
     async (req, reply) => {
-      const { status, vendorBranchId, userId } = req.query as {
+      const { status, vendorBranchId, userId, vendorId } = req.query as {
         status?: boolean;
         vendorBranchId?: string;
         userId?: string;
+        vendorId?: string;
       };
 
-      let conditions = [];
+      // Base query: join goods dengan vendorBranch
+      let query = db
+        .select({
+          goods: goods,
+          branch: vendorBranch,
+        })
+        .from(goods)
+        .leftJoin(vendorBranch, eq(goods.vendorBranchId, vendorBranch.id));
 
-      if (status) conditions.push(eq(goods.status, status));
+      // Array untuk menampung kondisi
+      const conditions = [];
+
+      if (status !== undefined) conditions.push(eq(goods.status, status));
       if (vendorBranchId)
         conditions.push(eq(goods.vendorBranchId, vendorBranchId));
       if (userId) conditions.push(eq(goods.userId, userId));
+      if (vendorId) conditions.push(eq(vendorBranch.vendorId, vendorId));
 
-      const query =
-        conditions.length > 0
-          ? db
-              .select()
-              .from(goods)
-              .where(and(...conditions))
-          : db.select().from(goods);
+      // Tambahkan kondisi ke query jika ada
+      if (conditions.length > 0) {
+        // @ts-ignore
+        query = query.where(and(...conditions));
+      }
 
       const result = await query;
 
+      // Format agar data goods-nya lebih rapi (karena hasil join)
+      const formatted = result.map((r) => ({
+        ...r.goods,
+        vendorBranch: r.branch,
+      }));
+
       reply.code(200).send({
-        count: result.length,
-        data: result,
+        count: formatted.length,
+        data: formatted,
       });
     }
   );
